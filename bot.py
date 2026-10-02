@@ -1,4 +1,4 @@
-import os
+nimport os
 import time
 import threading
 import yfinance as yf
