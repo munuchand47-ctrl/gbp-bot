@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "BOT LIVE"
+      return "BOT LIVE"
 
 @bot.message_handler(commands=['start','signal'])
 def sig(m):
@@ -22,7 +22,7 @@ def sig(m):
         dire = "UP 🟢 BUY" if price > prev else "DOWN 🔴 SELL"
         now = datetime.now() + timedelta(hours=5, minutes=30)
         entry = now + timedelta(minutes=1)
-        txt = f"{dire}\n\n💰 Price: {price:.5f}\n⏰ Time: {now.strftime('%I:%M:%S %p')}\n🎯 Entry: {entry.strftime('%I:%M %p')}\n⏳ Expiry: 1 Min\n✅ GBP/USD REAL"
+                txt = dire + "\nPrice: " + str(round(price,5)) + "\nTime: " + now.strftime("%H:%M:%S") + "\nEntry: " + entry.strftime("%H:%M")
         bot.reply_to(m, txt)
     except Exception as e:
         bot.reply_to(m, f"Error: {e}")
@@ -31,4 +31,4 @@ def run_bot():
     bot.infinity_polling()
 
 threading.Thread(target=run_bot, daemon=True).start()
-app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+app.run(host="0.0.0.0",port=int(os.environ.get("PORT",10000)))
