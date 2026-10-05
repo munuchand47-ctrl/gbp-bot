@@ -20,9 +20,9 @@ def sig(m):
         ist = pytz.timezone('Asia/Kolkata')
         now = datetime.now(ist)
         df = yf.download('GBPJPY=X', period='1d', interval='1m', progress=False, auto_adjust=True)
-        o = float(df['Open'].iloc[-1])
-        c = float(df['Close'].iloc[-1])
-        p = float(df['Close'].iloc[-2])
+     o = float(df['Open'].iloc[-1].values[0])
+    c = float(df['Close'].iloc[-1].values[0])
+    p = float(df['Close'].iloc[-2].values[0])
         dire = 'DOWN' if o > c and c < p else 'UP'
         entry = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
         wait = int((entry - now).total_seconds())
