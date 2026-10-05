@@ -2,9 +2,9 @@ import os
 import threading
 import yfinance as yf
 import telebot
+import pytz
 from flask import Flask
 from datetime import datetime, timedelta
-import pytz
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -12,44 +12,29 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return 'GBPJPY REAL LIVE'
+    return 'GBPJPY Real Market Live'
 
-@bot.message_handler(commands=['start','signal','g'])
+@bot.message_handler(commands=['start', 'g'])
 def sig(m):
     try:
         ist = pytz.timezone('Asia/Kolkata')
         now = datetime.now(ist)
-
-        if now.weekday() >= 5:
-            bot.reply_to(m, 'REAL MARKET CLOSED')
-            return
-
         df = yf.download('GBPJPY=X', period='1d', interval='1m', progress=False, auto_adjust=True)
-
-        if len(df) < 3:
-            bot.reply_to(m, 'Market data loading...')
-            return
-
         o = float(df['Open'].iloc[-1])
         c = float(df['Close'].iloc[-1])
         p = float(df['Close'].iloc[-2])
-
-        upper = max(o, c)
-        lower = min(o, c)
-
-        bear = o > c and c < p
-        dire = "DOWN SELL" if bear else "UP BUY"
-
-        # 50 SECOND LOGIC - MISS HEBA NAHI
+        dire = 'DOWN' if o > c and c < p else 'UP'
         entry = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
-        if (entry - now).seconds < 50:
+        wait = int((entry - now).total_seconds())
+        if wait < 50:
             entry = entry + timedelta(minutes=1)
-
-        msg = f"GBPJPY REAL Price: {round(c,3)} Signal: {dire} Entry: {entry.strftime('%H:%M')} - 50 Sec Baki - Miss Heba Nahi"
+            wait = int((entry - now).total_seconds())
+        end = entry + timedelta(minutes=1)
+        tf = "%H:%M"
+        msg = dire + " " + str(round(c,3)) + " | GBPJPY Real\nEntry " + entry.strftime(tf) + ":00 (" + str(wait) + "s)\nEnd " + end.strftime(tf) + ":00 | 1 MIN"
         bot.reply_to(m, msg)
-
     except Exception as e:
-        bot.reply_to(m, f"Error: {e}")
+        bot.reply_to(m, "Error " + str(e))
 
 def run_bot():
     bot.infinity_polling()
